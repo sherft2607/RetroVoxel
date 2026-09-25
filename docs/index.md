@@ -10,7 +10,7 @@ color grid — into voxel meshes, mosaic layouts, and laser-cut fabrication geom
 - **License:** MIT
 - **GitHub:** https://github.com/sherft2607/RetroVoxel
 - **Food4Rhino:** _(added once listed on food4rhino.com)_
-- **Released:** _(added at first tagged release)_
+- **Released:** 2026-09-25 ([v1.0.0](https://github.com/sherft2607/RetroVoxel/releases/tag/v1.0.0))
 
 ## Install
 
@@ -20,7 +20,7 @@ Search "RetroVoxel" in Rhino's `_PackageManager`.
 
 | Subcategory | Components |
 |---|---|
-| 01. Ingest | Local Sprite Loader, Sprite Sheet Splitter, RA Game Info, RA Badges |
+| 01. Ingest | Local Sprite Loader, Sprite Sheet Splitter, RA Game Info, RA Badges, Find Game, RA Game Images |
 | 02. Color | Palette Quantizer, Delta-E Filament Matcher, Filament Library Loader |
 | 03. Grid | Pixel Grid Builder |
 | 04. Fabrication | Voxel Mesh Shell, Multi-Material Interlock, Laser Standoff Stack, Achievement Attribute Bridge |
