@@ -7,7 +7,7 @@
   "current_phase": "published",
   "phases_completed": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
   "github": { "repo": "sherft2607/RetroVoxel", "url": "https://github.com/sherft2607/RetroVoxel", "visibility": "public", "workflows": ["build.yml", "publish.yml"], "released_tags": ["v1.0.0"] },
-  "published": { "github_release": "https://github.com/sherft2607/RetroVoxel/releases/tag/v1.0.0", "yak_pushed": false, "food4rhino_url": null, "backfilled": false },
+  "published": { "github_release": "https://github.com/sherft2607/RetroVoxel/releases/tag/v1.0.0", "yak_pushed": true, "food4rhino_url": null, "backfilled": true },
   "packaged": { "yak_built_locally": ["retrovoxel-1.0.0-rh7_0-any.yak", "retrovoxel-1.0.0-rh8_0-win.yak", "retrovoxel-1.0.0-rh8_0-mac.yak"], "in": "dist/ (gitignored, local only until tag push builds via CI)" },
   "phase_9_files_written": ["Utilities/RetroVoxelClient.cs", "Utilities/PluginUtilities.cs", "Utilities/ButtonComponent.cs", "Components/Presets/RAConsolePreset.cs"],
   "phase_7_blocked": null,

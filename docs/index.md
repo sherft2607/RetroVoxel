@@ -14,7 +14,8 @@ color grid — into voxel meshes, mosaic layouts, and laser-cut fabrication geom
 
 ## Install
 
-Search "RetroVoxel" in Rhino's `_PackageManager`.
+Search "RetroVoxel" in Rhino's `_PackageManager` (Yak package `retrovoxel`, published for
+Rhino 7 Windows, Rhino 8 Windows, and Rhino 8 Mac).
 
 ## Components by tab
 

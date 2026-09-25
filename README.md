@@ -30,8 +30,8 @@ Component chains for each of these are in [docs/workflows.md](docs/workflows.md)
 <!-- pr:begin install -->
 ## Installation
 
-**Food4Rhino:** `(pending first release)`
-**Yak:** `_PackageManager` → search `retrovoxel` `(pending first release)`
+**Food4Rhino:** `(pending listing)`
+**Yak:** `_PackageManager` → search `retrovoxel`
 
 **Rhino 8 note:** the Rhino 8 packages are built for .NET 7 and load only when Rhino runs on the .NET Core runtime (its default). If the RetroVoxel tab is missing, run `SetDotNetRuntime` in Rhino, choose **.NET Core**, and restart.
 
