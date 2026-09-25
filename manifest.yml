@@ -1,0 +1,13 @@
+name: retrovoxel
+version: 1.0.0
+authors:
+  - Shandon Herft
+description: "Computational design and physical fabrication toolkit for retro gaming pixel art, sprite sheets, and mosaic geometry."
+url: https://github.com/sherft2607/RetroVoxel
+keywords:
+  - grasshopper
+  - rhino
+  - retroachievements
+  - rest
+  - api
+icon: RetroVoxelLogo.png

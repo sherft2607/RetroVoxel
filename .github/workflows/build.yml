@@ -1,0 +1,31 @@
+name: Build RetroVoxel
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          # SDK 8 builds net48, net7.0-windows, net7.0 AND the net8.0 test project.
+          dotnet-version: '8.x'
+
+      - name: Restore
+        run: |
+          dotnet restore RetroVoxel.csproj
+          dotnet restore RetroVoxel.Tests/RetroVoxel.Tests.csproj
+
+      - name: Build (all targets)
+        run: dotnet build RetroVoxel.csproj -c Release --no-restore
+
+      - name: Test (builder tests, net8.0)
+        run: dotnet test RetroVoxel.Tests/RetroVoxel.Tests.csproj -c Release --no-restore

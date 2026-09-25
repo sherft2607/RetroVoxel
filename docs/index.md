@@ -8,7 +8,7 @@ color grid — into voxel meshes, mosaic layouts, and laser-cut fabrication geom
 
 - **Version:** 1.0.0
 - **License:** MIT
-- **GitHub:** https://github.com/shandonherft/RetroVoxel
+- **GitHub:** https://github.com/sherft2607/RetroVoxel
 - **Food4Rhino:** _(added once listed on food4rhino.com)_
 - **Released:** _(added at first tagged release)_
 
