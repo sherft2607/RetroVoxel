@@ -138,5 +138,10 @@ jobs:
             dist/*.yak
           generate_release_notes: true
           name: "RetroVoxel ${{ steps.version.outputs.VERSION }}"
+          body: |
+            **Platform verification:**
+            - Rhino 7 Windows (net48) — compile-verified
+            - Rhino 8 Windows (net7.0-windows) — live-tested extensively in Grasshopper
+            - Rhino 8 Mac (net7.0) — compile-verified only, **not yet run on real Mac hardware**. Seeking community verification — please open an issue if you install this on Mac and it works (or doesn't).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
