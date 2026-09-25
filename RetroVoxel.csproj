@@ -1,0 +1,93 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Rhino 7: net48 | Rhino 8 Windows: net7.0-windows | Rhino 8 Mac: net7.0 -->
+    <TargetFrameworks>net7.0-windows;net7.0;net48</TargetFrameworks>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <TargetExt>.gha</TargetExt>
+    <!-- CA1416: System.Drawing / WinForms platform-compat warnings on the net7.0 (Mac) target are
+         expected and unavoidable for a GH plugin — suppressed so pr-build's "0 warnings" gate is
+         meaningful. Do not add other codes here without a reason comment. -->
+    <NoWarn>$(NoWarn);NU1701;NETSDK1086;CA1416</NoWarn>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <!-- A Bitmap (icon) resource in Resources.resx requires preserialized resources to build on
+         net48 (Rhino 7) AND net7.0 (Rhino 8 Mac). Set for all targets up front. -->
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Assembly + Yak metadata. <Version> is THE version: GH_AssemblyInfo.AssemblyVersion reads it
+         from the compiled assembly, manifest.yml copies it, and CI overrides it from the git tag
+         with `dotnet build -p:Version=x.y.z`. Always three parts — yak requires x.y.z. -->
+    <Version>1.0.0</Version>
+    <Title>RetroVoxel</Title>
+    <Company>RetroVoxel Authors</Company>
+    <Description>Computational design and physical fabrication toolkit for retro gaming pixel art, sprite sheets, and mosaic geometry. Built with the PleaseREST Claude Code plugin (please-rest v1.0.0).</Description>
+  </PropertyGroup>
+
+  <!-- Test project lives in a subfolder; keep it out of the main plugin build -->
+  <ItemGroup>
+    <Compile Remove="RetroVoxel.Tests\**\*.cs" />
+    <EmbeddedResource Remove="RetroVoxel.Tests\**" />
+    <None Remove="RetroVoxel.Tests\**" />
+  </ItemGroup>
+
+  <!-- Yak packaging: a Release build must leave ONLY what ships in bin/Release/<tfm> -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
+  </PropertyGroup>
+
+  <!-- Yak packaging inputs -->
+  <ItemGroup>
+    <None Include="manifest.yml" CopyToOutputDirectory="PreserveNewest" Condition="Exists('manifest.yml')" />
+    <None Include="Icons\RVX_RetroVoxelLogo.png" Link="RetroVoxelLogo.png" CopyToOutputDirectory="PreserveNewest" Condition="Exists('Icons\RVX_RetroVoxelLogo.png')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grasshopper" Version="7.0.20314.3001" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
+    <PackageReference Include="Grasshopper" Version="8.0.23304.9001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!-- Runtime support for the preserialized Bitmap resources above; required on net48 + net7.0 Mac -->
+    <PackageReference Include="System.Resources.Extensions" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- net48 (Rhino 7): RetroVoxelClient.cs uses HttpClient/HttpRequestMessage/HttpMethod, which is
+       not auto-referenced in an SDK-style net48 project without this. -->
+  <ItemGroup Condition="$(TargetFramework) == 'net48'">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <!-- Windows-only builds (Rh7 net48 + Rh8 net7.0-windows) -->
+  <PropertyGroup Condition="$(TargetFramework.Contains('-windows')) or $(TargetFramework.StartsWith('net4'))">
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <!-- WinForms for .NET 7.0 on macOS (Rh8 Mac) -->
+  <ItemGroup Condition="!($(TargetFramework.Contains('-windows')) or $(TargetFramework.StartsWith('net4')))">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="1.0.3" ExcludeAssets="all" GeneratePathProperty="true" />
+    <Reference Include="$(PkgMicrosoft_NETFramework_ReferenceAssemblies_net48)\build\.NETFramework\v4.8\System.Windows.Forms.dll" Private="False" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!-- Enable debugging in Rhino 7 on Mac -->
+  <Target Name="CopyPdbForMonoDebugging" AfterTargets="AfterBuild">
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFiles="$(TargetDir)$(TargetName).gha.pdb"
+          Condition="$([MSBuild]::IsOSPlatform(OSX)) and $(TargetFramework.StartsWith('net4')) and Exists('$(TargetDir)$(TargetName).pdb')" />
+  </Target>
+
+</Project>

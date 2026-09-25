@@ -1,0 +1,218 @@
+[
+  {
+    "endpoint_id": "GetConsoleIDs",
+    "component": "RAConsolePresetComponent",
+    "method": "GET",
+    "url_template": "/API/API_GetConsoleIDs.php",
+    "base_url": "https://retroachievements.org",
+    "auth_in": "query:y",
+    "path_params": [],
+    "query_params": [
+      {
+        "name": "y",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "a",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "g",
+        "type": "string",
+        "required": false
+      }
+    ],
+    "headers": {},
+    "body_schema": null,
+    "body_required": false,
+    "content_type": null,
+    "response_schema": null,
+    "example_request": {},
+    "example_response": [
+      {
+        "ID": 1,
+        "Name": "Mega Drive",
+        "IconURL": "https://static.retroachievements.org/assets/images/system/md.png",
+        "Active": true,
+        "IsGameSystem": true
+      }
+    ],
+    "notes": "auth_in manually corrected from extractor default 'header'/Bearer to 'query:y'.",
+    "status": "VALIDATED",
+    "test_result": {
+      "tag": "VALIDATED",
+      "status_code": 200
+    }
+  },
+  {
+    "endpoint_id": "GetGame",
+    "component": "LaserStandoffStackComponent",
+    "method": "GET",
+    "url_template": "/API/API_GetGame.php",
+    "base_url": "https://retroachievements.org",
+    "auth_in": "query:y",
+    "path_params": [],
+    "query_params": [
+      {
+        "name": "y",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "i",
+        "type": "string",
+        "required": true
+      }
+    ],
+    "headers": {},
+    "body_schema": null,
+    "body_required": false,
+    "content_type": null,
+    "response_schema": {
+      "Title": "str",
+      "ConsoleID": "int",
+      "ImageBoxArt": "str"
+    },
+    "example_request": {},
+    "example_response": {
+      "Title": "Sonic the Hedgehog",
+      "ConsoleID": 1,
+      "ImageBoxArt": "/Images/051872.png"
+    },
+    "notes": "auth_in manually corrected to 'query:y'.",
+    "status": "VALIDATED",
+    "test_result": {
+      "tag": "VALIDATED",
+      "status_code": 200
+    }
+  },
+  {
+    "endpoint_id": "GetGameExtended",
+    "component": "RAGameInfoComponent",
+    "method": "GET",
+    "url_template": "/API/API_GetGameExtended.php",
+    "base_url": "https://retroachievements.org",
+    "auth_in": "query:y",
+    "path_params": [],
+    "query_params": [
+      {
+        "name": "y",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "i",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "f",
+        "type": "string",
+        "required": false
+      }
+    ],
+    "headers": {},
+    "body_schema": null,
+    "body_required": false,
+    "content_type": null,
+    "response_schema": {
+      "Achievements": {
+        "<id>": {
+          "ID": "int",
+          "Title": "str",
+          "Description": "str",
+          "Points": "int",
+          "BadgeName": "str"
+        }
+      }
+    },
+    "example_request": {},
+    "example_response": {},
+    "notes": "auth_in manually corrected to 'query:y'.",
+    "status": "VALIDATED",
+    "test_result": {
+      "tag": "VALIDATED",
+      "status_code": 200
+    }
+  },
+  {
+    "endpoint_id": "GetGameList",
+    "component": "FindGameComponent",
+    "method": "GET",
+    "url_template": "/API/API_GetGameList.php",
+    "base_url": "https://retroachievements.org",
+    "auth_in": "query:y",
+    "path_params": [],
+    "query_params": [
+      {
+        "name": "y",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "i",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "f",
+        "type": "string",
+        "required": false,
+        "description": "1 = only games with achievements, default 0"
+      },
+      {
+        "name": "h",
+        "type": "string",
+        "required": false,
+        "description": "1 = include supported hashes, default 0"
+      },
+      {
+        "name": "o",
+        "type": "string",
+        "required": false,
+        "description": "result offset, default 0"
+      },
+      {
+        "name": "c",
+        "type": "string",
+        "required": false,
+        "description": "max results, default 0 = all"
+      }
+    ],
+    "headers": {},
+    "body_schema": null,
+    "body_required": false,
+    "content_type": null,
+    "response_schema": {
+      "Title": "str",
+      "ID": "int",
+      "ConsoleID": "int",
+      "ConsoleName": "str",
+      "ImageIcon": "str",
+      "NumAchievements": "int",
+      "NumLeaderboards": "int",
+      "Points": "int",
+      "DateModified": "str",
+      "ForumTopicID": "int"
+    },
+    "example_request": {},
+    "example_response": [
+      {
+        "Title": "Advanced Busterhawk: Gley Lancer",
+        "ID": 3684,
+        "ConsoleID": 1,
+        "ConsoleName": "Mega Drive",
+        "ImageIcon": "/Images/020895.png",
+        "NumAchievements": 44,
+        "NumLeaderboards": 33,
+        "Points": 595,
+        "DateModified": "2022-11-20 03:44:12",
+        "ForumTopicID": 1936
+      }
+    ],
+    "notes": "auth_in manually corrected from extractor default 'header'/Bearer to 'query:y'. Game identifier field is 'ID', title field is 'Title'.",
+    "status": "EXTRACTED"
+  }
+]

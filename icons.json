@@ -1,0 +1,100 @@
+{
+  "plugin_name": "RetroVoxel",
+  "plugin_prefix": "RVX",
+  "resources_path": "Icons",
+  "resx_path": "Properties/Resources.resx",
+
+  "defaults": {
+    "size": 24,
+    "fg_color": "#FFFFFF",
+    "background": {
+      "shape": {
+        "type": "rounded-square",
+        "gradient": { "from": "#7B2FF7", "to": "#E8437A", "angle": 135 }
+      }
+    }
+  },
+
+  "plugin_icon": {
+    "size": 16,
+    "fg_iconify_id": "mdi:controller-classic-outline",
+    "fg_color": "#FFFFFF",
+    "background": {
+      "shape": {
+        "type": "rounded-square",
+        "gradient": { "from": "#7B2FF7", "to": "#E8437A", "angle": 135 }
+      }
+    }
+  },
+
+  "subcategories": {
+    "01. Ingest": {
+      "background": {
+        "shape": { "type": "rounded-square", "gradient": { "from": "#7B2FF7", "to": "#E8437A", "angle": 135 } },
+        "icon": { "iconify_id": "mdi:download-outline", "color": "#FFFFFF", "opacity": 0.35 }
+      },
+      "fg_color": "#FFFFFF"
+    },
+    "02. Color": {
+      "background": {
+        "shape": { "type": "rounded-square", "gradient": { "from": "#7B2FF7", "to": "#E8437A", "angle": 135 } },
+        "icon": { "iconify_id": "mdi:palette-outline", "color": "#FFFFFF", "opacity": 0.35 }
+      },
+      "fg_color": "#FFFFFF"
+    },
+    "03. Grid": {
+      "background": {
+        "shape": { "type": "rounded-square", "gradient": { "from": "#7B2FF7", "to": "#E8437A", "angle": 135 } },
+        "icon": { "iconify_id": "mdi:grid", "color": "#FFFFFF", "opacity": 0.35 }
+      },
+      "fg_color": "#FFFFFF"
+    },
+    "04. Fabrication": {
+      "background": {
+        "shape": { "type": "rounded-square", "gradient": { "from": "#7B2FF7", "to": "#E8437A", "angle": 135 } },
+        "icon": { "iconify_id": "mdi:printer-3d-nozzle-outline", "color": "#FFFFFF", "opacity": 0.35 }
+      },
+      "fg_color": "#FFFFFF"
+    },
+    "05. Mosaic": {
+      "background": {
+        "shape": { "type": "rounded-square", "gradient": { "from": "#7B2FF7", "to": "#E8437A", "angle": 135 } },
+        "icon": { "iconify_id": "mdi:view-grid-outline", "color": "#FFFFFF", "opacity": 0.35 }
+      },
+      "fg_color": "#FFFFFF"
+    },
+    "06. Presets": {
+      "background": {
+        "shape": { "type": "rounded-square", "gradient": { "from": "#7B2FF7", "to": "#E8437A", "angle": 135 } },
+        "icon": { "iconify_id": "mdi:format-list-bulleted", "color": "#FFFFFF", "opacity": 0.35 }
+      },
+      "fg_color": "#FFFFFF"
+    }
+  },
+
+  "components": [
+    { "name": "RAConsole", "subcategory": "06. Presets", "fg_iconify_id": "mdi:key-outline" },
+
+    { "name": "LocalSpriteLoader", "subcategory": "01. Ingest", "fg_iconify_id": "mdi:image-outline" },
+    { "name": "SpriteSheetSplitter", "subcategory": "01. Ingest", "fg_iconify_id": "mdi:view-grid-plus-outline" },
+    { "name": "RAGameInfo", "subcategory": "01. Ingest", "fg_iconify_id": "mdi:gamepad-variant-outline" },
+    { "name": "RABadges", "subcategory": "01. Ingest", "fg_iconify_id": "mdi:medal-outline" },
+    { "name": "FindGame", "subcategory": "01. Ingest", "fg_iconify_id": "mdi:magnify" },
+    { "name": "RAGameImages", "subcategory": "01. Ingest", "fg_iconify_id": "mdi:image-multiple-outline" },
+
+    { "name": "PaletteQuantizer", "subcategory": "02. Color", "fg_iconify_id": "mdi:palette-swatch-outline" },
+    { "name": "DeltaEFilamentMatcher", "subcategory": "02. Color", "fg_iconify_id": "mdi:target" },
+    { "name": "FilamentLibraryLoader", "subcategory": "02. Color", "fg_iconify_id": "mdi:folder-open-outline" },
+
+    { "name": "PixelGridBuilder", "subcategory": "03. Grid", "fg_iconify_id": "mdi:grid-large" },
+
+    { "name": "VoxelMeshShell", "subcategory": "04. Fabrication", "fg_iconify_id": "mdi:cube-outline" },
+    { "name": "MultiMaterialInterlock", "subcategory": "04. Fabrication", "fg_iconify_id": "mdi:puzzle-outline" },
+    { "name": "LaserStandoffStack", "subcategory": "04. Fabrication", "fg_iconify_id": "mdi:layers-outline" },
+    { "name": "AchievementAttributeBridge", "subcategory": "04. Fabrication", "fg_iconify_id": "mdi:tag-outline" },
+
+    { "name": "LegoStudPlate", "subcategory": "05. Mosaic", "fg_iconify_id": "mdi:view-module" },
+    { "name": "PerlerBeadGrid", "subcategory": "05. Mosaic", "fg_iconify_id": "mdi:dots-grid" },
+    { "name": "LEDMatrixMapper", "subcategory": "05. Mosaic", "fg_iconify_id": "mdi:led-strip-variant" }
+  ]
+}

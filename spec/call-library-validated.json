@@ -1,0 +1,270 @@
+[
+  {
+    "endpoint_id": "GetConsoleIDs",
+    "component": "RAConsolePresetComponent",
+    "method": "GET",
+    "url_template": "/API/API_GetConsoleIDs.php",
+    "base_url": "https://retroachievements.org",
+    "auth_in": "query:y",
+    "path_params": [],
+    "query_params": [
+      {
+        "name": "y",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "a",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "g",
+        "type": "string",
+        "required": false
+      }
+    ],
+    "headers": {},
+    "body_schema": null,
+    "body_required": false,
+    "content_type": null,
+    "response_schema": null,
+    "example_request": {},
+    "example_response": [
+      {
+        "ID": 1,
+        "Name": "Mega Drive",
+        "IconURL": "https://static.retroachievements.org/assets/images/system/md.png",
+        "Active": true,
+        "IsGameSystem": true
+      }
+    ],
+    "notes": "auth_in manually corrected from extractor default 'header'/Bearer to 'query:y' \u2014 RA auth is always a ?y=<key> query param, never a header, per feasibility.json Gate 1.",
+    "status": "VALIDATED",
+    "test_result": {
+      "tag": "VALIDATED",
+      "status_code": 200,
+      "latency_ms": 820,
+      "error": "unfilled query param(s) ['y']",
+      "error_body": ""
+    }
+  },
+  {
+    "endpoint_id": "GetGame",
+    "component": "LaserStandoffStackComponent",
+    "method": "GET",
+    "url_template": "/API/API_GetGame.php",
+    "base_url": "https://retroachievements.org",
+    "auth_in": "query:y",
+    "path_params": [],
+    "query_params": [
+      {
+        "name": "y",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "i",
+        "type": "string",
+        "required": true
+      }
+    ],
+    "headers": {},
+    "body_schema": null,
+    "body_required": false,
+    "content_type": null,
+    "response_schema": {
+      "Title": "str",
+      "GameTitle": "str",
+      "ConsoleID": "int",
+      "ConsoleName": "str",
+      "Console": "str",
+      "ForumTopicID": "int",
+      "Flags": "int",
+      "GameIcon": "str",
+      "ImageIcon": "str",
+      "ImageTitle": "str",
+      "ImageIngame": "str",
+      "ImageBoxArt": "str",
+      "Publisher": "str",
+      "Developer": "str",
+      "Genre": "str",
+      "Released": "str",
+      "ReleasedAtGranularity": "str"
+    },
+    "example_request": {},
+    "example_response": {
+      "Title": "Sonic the Hedgehog",
+      "GameTitle": "Sonic the Hedgehog",
+      "ConsoleID": 1,
+      "ConsoleName": "Mega Drive",
+      "Console": "Mega Drive",
+      "ForumTopicID": 112,
+      "Flags": 0,
+      "GameIcon": "/Images/067895.png",
+      "ImageIcon": "/Images/067895.png",
+      "ImageTitle": "/Images/054993.png",
+      "ImageIngame": "/Images/000010.png",
+      "ImageBoxArt": "/Images/051872.png",
+      "Publisher": "",
+      "Developer": "",
+      "Genre": "",
+      "Released": "1992-06-02 00:00:00",
+      "ReleasedAtGranularity": "day"
+    },
+    "notes": "auth_in manually corrected to 'query:y'. Extractor marked AMBIGUOUS because it put the response JSON into example_request (GET has no body \u2014 example_request cleared to {} manually, response moved to example_response).",
+    "status": "VALIDATED",
+    "test_result": {
+      "tag": "VALIDATED",
+      "status_code": 200,
+      "latency_ms": 576,
+      "error": "unfilled query param(s) ['y']",
+      "error_body": ""
+    }
+  },
+  {
+    "endpoint_id": "GetGameExtended",
+    "component": "RAGameInfoComponent",
+    "method": "GET",
+    "url_template": "/API/API_GetGameExtended.php",
+    "base_url": "https://retroachievements.org",
+    "auth_in": "query:y",
+    "path_params": [],
+    "query_params": [
+      {
+        "name": "y",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "i",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "f",
+        "type": "string",
+        "required": false
+      }
+    ],
+    "headers": {},
+    "body_schema": null,
+    "body_required": false,
+    "content_type": null,
+    "response_schema": {
+      "Achievements": {
+        "<achievement_id>": {
+          "ID": "int",
+          "NumAwarded": "int",
+          "NumAwardedHardcore": "int",
+          "Title": "str",
+          "Description": "str",
+          "Points": "int",
+          "TrueRatio": "int",
+          "Author": "str",
+          "DateModified": "str",
+          "DateCreated": "str",
+          "BadgeName": "str",
+          "DisplayOrder": "int",
+          "MemAddr": "str"
+        }
+      }
+    },
+    "example_request": {},
+    "example_response": {},
+    "notes": "auth_in manually corrected to 'query:y'. response_schema for Achievements[] added by hand from docs page content (extractor returned null response_schema for this page) \u2014 badge images resolve via https://i.retroachievements.org/Badge/{BadgeName}.png. Status reclassified EXTRACTED at Phase 7: this is a bodyless GET with fully known required params (y, i) \u2014 the earlier PARTIAL flag was about the response_schema being hand-filled, not about a missing/ambiguous request body, so there's nothing to enrich before testing.",
+    "status": "VALIDATED",
+    "test_result": {
+      "tag": "VALIDATED",
+      "status_code": 200,
+      "latency_ms": 690,
+      "error": "unfilled query param(s) ['y']",
+      "error_body": ""
+    }
+  },
+  {
+    "endpoint_id": "GetGameList",
+    "component": "FindGameComponent",
+    "method": "GET",
+    "url_template": "/API/API_GetGameList.php",
+    "base_url": "https://retroachievements.org",
+    "auth_in": "query:y",
+    "path_params": [],
+    "query_params": [
+      {
+        "name": "y",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "i",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "f",
+        "type": "string",
+        "required": false,
+        "description": "1 = only games with achievements, default 0"
+      },
+      {
+        "name": "h",
+        "type": "string",
+        "required": false,
+        "description": "1 = include supported hashes, default 0"
+      },
+      {
+        "name": "o",
+        "type": "string",
+        "required": false,
+        "description": "result offset, default 0"
+      },
+      {
+        "name": "c",
+        "type": "string",
+        "required": false,
+        "description": "max results, default 0 = all"
+      }
+    ],
+    "headers": {},
+    "body_schema": null,
+    "body_required": false,
+    "content_type": null,
+    "response_schema": {
+      "Title": "str",
+      "ID": "int",
+      "ConsoleID": "int",
+      "ConsoleName": "str",
+      "ImageIcon": "str",
+      "NumAchievements": "int",
+      "NumLeaderboards": "int",
+      "Points": "int",
+      "DateModified": "str",
+      "ForumTopicID": "int"
+    },
+    "example_request": {},
+    "example_response": [
+      {
+        "Title": "Advanced Busterhawk: Gley Lancer",
+        "ID": 3684,
+        "ConsoleID": 1,
+        "ConsoleName": "Mega Drive",
+        "ImageIcon": "/Images/020895.png",
+        "NumAchievements": 44,
+        "NumLeaderboards": 33,
+        "Points": 595,
+        "DateModified": "2022-11-20 03:44:12",
+        "ForumTopicID": 1936
+      }
+    ],
+    "notes": "auth_in manually corrected from extractor default 'header'/Bearer to 'query:y'. Game identifier field is 'ID', title field is 'Title'.",
+    "status": "VALIDATED",
+    "test_result": {
+      "tag": "VALIDATED",
+      "status_code": 200,
+      "latency_ms": 917,
+      "error": "unfilled query param(s) ['y']",
+      "error_body": ""
+    }
+  }
+]

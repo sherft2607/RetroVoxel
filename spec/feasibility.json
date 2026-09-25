@@ -1,0 +1,72 @@
+{
+  "platform": "RetroAchievements Web API",
+  "base_url": "https://retroachievements.org/API/",
+  "media_base_url": "https://i.retroachievements.org/",
+  "docs_url": "https://api-docs.retroachievements.org/",
+  "api_version": "v1 (unversioned in URL; descriptive .php endpoint names)",
+  "auth": {
+    "method": "API key via query parameter",
+    "param": "y",
+    "secondary_param": "u",
+    "notes": "Web API key from account settings; treat as secret. Passed as ?y=<key> on every request. Many user-scoped endpoints (e.g. API_GetUserProfile.php, API_GetUserProgress.php, API_GetGameInfoAndUserProgress.php) additionally require the target username via ?u=<username> — NOT ?z= as suggested; RA's actual query key is 'u'. Game-only endpoints (GetGame, GetGameExtended, GetConsoleIDs, GetGameList) need only 'y'. The client must support optional 'u' alongside 'y' per-call."
+  },
+  "extra_headers": [],
+  "resource_hierarchy": {
+    "Console (System)": {
+      "endpoint": "API_GetConsoleIDs.php",
+      "children": {
+        "Game": {
+          "endpoint": "API_GetGameList.php (list by console) / API_GetGame.php (single, by game id) / API_GetGameExtended.php",
+          "children": {
+            "Achievement": {
+              "endpoint": "part of API_GetGameExtended.php response (Achievements object, keyed by achievement ID)",
+              "badge_field": "BadgeName -> image at {media_base_url}Badge/{BadgeName}.png"
+            }
+          }
+        }
+      }
+    },
+    "User": {
+      "endpoint": "API_GetUserProfile.php / API_GetUserSummary.php",
+      "children": {
+        "UserProgress": "API_GetGameInfoAndUserProgress.php, API_GetUserProgress.php",
+        "UserAwards": "API_GetUserAwards.php"
+      }
+    }
+  },
+  "endpoints_found": 39,
+  "endpoints_relevant_to_v1": [
+    {
+      "id": "GetConsoleIDs",
+      "method": "GET",
+      "path": "API_GetConsoleIDs.php",
+      "params": { "y": "required, api key", "a": "optional, active-only bool", "g": "optional, gaming-systems-only bool" },
+      "purpose": "Retro console catalog (Ingest subcategory)"
+    },
+    {
+      "id": "GetGame",
+      "method": "GET",
+      "path": "API_GetGame.php",
+      "params": { "y": "required", "i": "required, game id" },
+      "purpose": "Basic game metadata + image paths (RA Game Info)",
+      "response_image_fields": ["GameIcon", "ImageIcon", "ImageTitle", "ImageIngame", "ImageBoxArt"]
+    },
+    {
+      "id": "GetGameExtended",
+      "method": "GET",
+      "path": "API_GetGameExtended.php",
+      "params": { "y": "required", "i": "required, game id", "f": "optional, defaults 3, 5 = include unofficial" },
+      "purpose": "Full game metadata + Achievements object with BadgeName per achievement (RA Game Info / RA Badges)"
+    },
+    {
+      "id": "GetGameList",
+      "method": "GET",
+      "path": "API_GetGameList.php",
+      "params": { "y": "required", "i": "console id" },
+      "purpose": "List games for a console, with hashes (Ingest)"
+    }
+  ],
+  "image_resolution_rule": "API image path fields (e.g. '/Images/067895.png', BadgeName) are relative; resolve game images via https://i.retroachievements.org/Images/{id}.png and achievement badges via https://i.retroachievements.org/Badge/{BadgeName}.png. Confirmed 'i.retroachievements.org' is the correct media CDN host (not 'media.retroachievements.org' — that domain was not found in official docs or source).",
+  "openapi_spec_available": false,
+  "notes": "retroachievements.org/API/ returns Cloudflare 403 to automated fetches (site-side bot protection) — discovery instead used the official api-docs.retroachievements.org site (via search + raw GitHub source at github.com/RetroAchievements/api-docs) and the RAWeb source repo. This does not block runtime API calls (Phase 7 uses the real API key + httpx, not this browser), only doc scraping."
+}

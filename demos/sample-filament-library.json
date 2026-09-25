@@ -1,0 +1,10 @@
+{
+  "filaments": [
+    { "name": "Red PLA", "hex": "#FF0000" },
+    { "name": "Blue PLA", "hex": "#0000FF" },
+    { "name": "Black PLA", "hex": "#000000" },
+    { "name": "White PLA", "hex": "#FFFFFF" },
+    { "name": "Yellow PLA", "hex": "#FFD700" },
+    { "name": "Green PLA", "hex": "#00FF00" }
+  ]
+}

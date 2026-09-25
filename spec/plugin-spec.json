@@ -1,0 +1,464 @@
+{
+  "plugin_name": "RetroVoxel",
+  "plugin_prefix": "RVX",
+  "platform": "RetroAchievements Web API",
+  "base_url": "https://retroachievements.org/API/",
+  "auth_method": "API key via query parameter (?y=), optional ?u=<username> on user-scoped calls",
+  "api_version": "unversioned (v1 docs)",
+  "tab_name": "RetroVoxel",
+  "notes": "RA API usage in this plugin is read-only (GET only) — no write/create/update/delete model. Fabrication and Mosaic subcategories are pure local geometry components with no HTTP calls at all; only Ingest talks to the network. Gate 2 resolutions: (1) Mosaic keeps 3 distinct components (Lego Stud Plate / Perler Bead Grid / LED Matrix Mapper) — different fabrication outputs (watertight stud meshes, pegboard layouts with part counts, serpentine wiring code arrays); shared grid-walk math lives in an internal helper (see PixelGridBuilders.cs / a shared MosaicHelpers routine), each keeps its own canvas icon. (2) Ingest keeps Local Sprite Loader and Sprite Sheet Splitter decoupled — single-frame artwork only needs the loader, multi-frame atlases need both. (3) The standalone Auth/key-check component was removed; RA Console (06. Presets) now takes Token and its GetConsoleIDs call serves as both connectivity verification and value-list populator. (4) All subcategory ribbon-tab names use zero-padded two-digit numeric prefixes (01.-07.) so PluginUtilities.TabName sorts correctly on the Grasshopper ribbon — unpadded prefixes (1., 2., ... 10.) sort lexicographically wrong once a build reaches double digits, the exact issue seen on the PokeData dogfood run.",
+  "ribbon_tab_numbering": "zero-padded two-digit (01, 02, ... 07) — never bare single-digit prefixes",
+
+  "subcategories": [
+    {
+      "name": "01. Ingest",
+      "type": "http",
+      "components": [
+        {
+          "class_name": "LocalSpriteLoaderComponent",
+          "file_name": "LocalSpriteLoader.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": null,
+          "name": "Local Sprite Loader",
+          "nickname": "LOAD",
+          "workflow": "Local sprite sheet -> per-frame voxel extrusion",
+          "inputs": [
+            { "name": "File Path", "nickname": "FP", "type": "string", "access": "item" }
+          ],
+          "outputs": [
+            { "name": "Image Path", "nickname": "IP", "type": "string", "access": "item" },
+            { "name": "Width", "nickname": "W", "type": "int", "access": "item" },
+            { "name": "Height", "nickname": "H", "type": "int", "access": "item" },
+            { "name": "Pixel Colors", "nickname": "PC", "type": "colour", "access": "tree", "note": "one branch {row} per row" }
+          ]
+        },
+        {
+          "class_name": "SpriteSheetSplitterComponent",
+          "file_name": "SpriteSheetSplitter.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": null,
+          "name": "Sprite Sheet Splitter",
+          "nickname": "SPLIT",
+          "workflow": "Local sprite sheet -> per-frame voxel extrusion",
+          "inputs": [
+            { "name": "Image Path", "nickname": "IP", "type": "string", "access": "item" },
+            { "name": "Frame Width", "nickname": "FW", "type": "int", "access": "item" },
+            { "name": "Frame Height", "nickname": "FH", "type": "int", "access": "item" }
+          ],
+          "outputs": [
+            { "name": "Frame Image Path", "nickname": "FIP", "type": "string", "access": "tree" },
+            { "name": "Frame Index", "nickname": "FI", "type": "int", "access": "tree" },
+            { "name": "Pixel Colors", "nickname": "PC", "type": "colour", "access": "tree", "note": "path {frameIndex, row}" }
+          ]
+        },
+        {
+          "class_name": "RAGameInfoComponent",
+          "file_name": "RAGameInfo.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": "GetGameExtended",
+          "name": "RA Game Info",
+          "nickname": "GAME",
+          "workflow": "Game badge set -> voxel plaque batch",
+          "inputs": [
+            { "name": "Token", "nickname": "T", "type": "string", "access": "item", "default": "" },
+            { "name": "Game ID", "nickname": "GID", "type": "int", "access": "item" }
+          ],
+          "outputs": [
+            { "name": "Status", "nickname": "S", "type": "string", "access": "item" },
+            { "name": "Game JSON", "nickname": "GJ", "type": "string", "access": "item" },
+            { "name": "Achievement JSON", "nickname": "AJ", "type": "string", "access": "tree" }
+          ],
+          "implementation_note": "Revised post-Gate-6: dropped the Response output (raw JSON is still cached internally, just not exposed as its own port) so RA Game Info exposes exactly Status/Game JSON/Achievement JSON. RA Badges is the sole component responsible for downloading badge PNGs and emitting Badge Name/Badge Image Path/Pixel Colors."
+        },
+        {
+          "class_name": "RABadgesComponent",
+          "file_name": "RABadges.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": "GetGameExtended",
+          "endpoint_note": "No separate documented endpoint — resolves each achievement's BadgeName (from RA Game Info's Achievement JSON) into a downloadable badge image at https://i.retroachievements.org/Badge/{BadgeName}.png and fetches the bitmap.",
+          "name": "RA Badges",
+          "nickname": "BADGE",
+          "workflow": "Game badge set -> voxel plaque batch",
+          "inputs": [
+            { "name": "Achievement JSON", "nickname": "AJ", "type": "string", "access": "tree" }
+          ],
+          "outputs": [
+            { "name": "Badge Image Path", "nickname": "BIP", "type": "string", "access": "tree" },
+            { "name": "Badge Resource ID", "nickname": "BRID", "type": "string", "access": "tree", "note": "renamed from Badge Name — this is the numeric CDN image ID, not a readable label" },
+            { "name": "Achievement Title", "nickname": "AT", "type": "string", "access": "tree", "note": "added: the actual readable label, from the same achievement record" },
+            { "name": "Pixel Colors", "nickname": "PC", "type": "colour", "access": "tree", "note": "path {badgeIndex, row}" },
+            { "name": "Status", "nickname": "S", "type": "string", "access": "item" }
+          ]
+        },
+        {
+          "class_name": "FindGameComponent",
+          "file_name": "FindGame.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": "GetGameList",
+          "endpoint_note": "Sibling-API name-search pattern — RA has no direct 'search by title' endpoint, so this resolves a name/substring against GetGameList for a given console.",
+          "name": "Find Game",
+          "nickname": "FIND",
+          "workflow": "Game badge set -> voxel plaque batch",
+          "note": "Added post-ship at user request: 'can Game ID take a name?' — RA Game Info's Game ID stays numeric-only (matches the validated GetGameExtended contract); this is the name->ID resolver that feeds it.",
+          "inputs": [
+            { "name": "Token", "nickname": "T", "type": "string", "access": "item", "default": "" },
+            { "name": "Console ID", "nickname": "CID", "type": "int", "access": "item" },
+            { "name": "Name", "nickname": "N", "type": "string", "access": "item" }
+          ],
+          "outputs": [
+            { "name": "Status", "nickname": "S", "type": "string", "access": "item" },
+            { "name": "Game ID", "nickname": "GID", "type": "int", "access": "list" },
+            { "name": "Game Title", "nickname": "GT", "type": "string", "access": "list" }
+          ]
+        },
+        {
+          "class_name": "RAGameImagesComponent",
+          "file_name": "RAGameImages.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": null,
+          "endpoint_note": "Downloads the game-level artwork paths already present in Game JSON (ImageIcon/ImageTitle/ImageIngame/ImageBoxArt) from the RA media CDN — same pattern as RA Badges, one level up (game artwork, not achievement badges). No separate documented endpoint.",
+          "name": "RA Game Images",
+          "nickname": "GIMG",
+          "workflow": "Game badge set -> voxel plaque batch",
+          "note": "Added post-ship at user request: 'can we not do voxels for actual games [not just achievements]?' — mirrors RA Badges' download+Pixel Colors pattern for a game's own artwork instead of an achievement badge.",
+          "inputs": [
+            { "name": "Game JSON", "nickname": "GJ", "type": "string", "access": "item" },
+            { "name": "Image Type", "nickname": "IT", "type": "string", "access": "item", "default": "Icon", "note": "one of: Icon, Title, Ingame, BoxArt" },
+            { "name": "Max Dimension", "nickname": "MD", "type": "int", "access": "item", "default": 64, "note": "added after a reported crash: box art/title screens are far higher-res than badges, so this downsamples before reading pixels (0 = no resize)" }
+          ],
+          "outputs": [
+            { "name": "Image Path", "nickname": "IP", "type": "string", "access": "item" },
+            { "name": "Pixel Colors", "nickname": "PC", "type": "colour", "access": "tree", "note": "one branch per row" },
+            { "name": "Status", "nickname": "S", "type": "string", "access": "item" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02. Color",
+      "type": "component",
+      "components": [
+        {
+          "class_name": "PaletteQuantizerComponent",
+          "file_name": "PaletteQuantizer.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": null,
+          "name": "Palette Quantizer",
+          "nickname": "QUANT",
+          "workflow": "Palette quantization sweep across a sprite tree",
+          "implementation_note": "Revised per Gate 6 contract clarification: consumes a Pixel Colors tree directly (from any Ingest component) instead of an image-path tree, and emits Color Indices (-1 = transparent/void) alongside a flat deduplicated Palette, matching the shape Delta-E Filament Matcher and every Fabrication/Mosaic component now expects.",
+          "inputs": [
+            { "name": "Pixel Colors", "nickname": "PC", "type": "colour", "access": "tree" },
+            { "name": "Max Colors", "nickname": "MC", "type": "int", "access": "item", "default": 16 }
+          ],
+          "outputs": [
+            { "name": "Quantized Colors", "nickname": "QC", "type": "colour", "access": "tree", "note": "same tree shape as Pixel Colors input" },
+            { "name": "Palette", "nickname": "PAL", "type": "colour", "access": "list" },
+            { "name": "Color Indices", "nickname": "CI", "type": "int", "access": "tree", "note": "same tree shape as input; -1 = void/transparent" }
+          ]
+        },
+        {
+          "class_name": "DeltaEFilamentMatcherComponent",
+          "file_name": "DeltaEFilamentMatcher.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": null,
+          "name": "Delta-E Filament Matcher",
+          "nickname": "MATCH",
+          "workflow": "Palette quantization sweep across a sprite tree",
+          "implementation_note": "Revised per Gate 6: consumes Palette Quantizer's flat Palette list instead of a per-branch Palette JSON tree.",
+          "inputs": [
+            { "name": "Palette", "nickname": "PAL", "type": "colour", "access": "list" },
+            { "name": "Filament Library JSON", "nickname": "FLJ", "type": "string", "access": "item" }
+          ],
+          "outputs": [
+            { "name": "Filament Match JSON", "nickname": "FMJ", "type": "string", "access": "list", "note": "one match per Palette entry, same order" }
+          ]
+        },
+        {
+          "class_name": "FilamentLibraryLoaderComponent",
+          "file_name": "FilamentLibraryLoader.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": null,
+          "name": "Filament Library Loader",
+          "nickname": "FLIB",
+          "workflow": "Palette quantization sweep across a sprite tree",
+          "note": "Added so users never hand-type or the plugin never hardcodes filament color data — there is no live filament-color API to source a built-in preset from, so the user's real library lives in their own JSON file on disk.",
+          "inputs": [
+            { "name": "File Path", "nickname": "FP", "type": "string", "access": "item", "default": "" }
+          ],
+          "outputs": [
+            { "name": "Filament Library JSON", "nickname": "FLJ", "type": "string", "access": "item" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03. Grid",
+      "type": "json",
+      "components": [
+        {
+          "class_name": "PixelGridBuilderComponent",
+          "file_name": "PixelGridBuilder.cs",
+          "type": "component",
+          "role": "aggregator",
+          "endpoint_id": null,
+          "name": "Pixel Grid Builder",
+          "nickname": "GRID",
+          "workflow": "Tabular pixel grid -> mosaic/voxel geometry (cross-platform benchmark)",
+          "note": "Accepts rows of pixel data (a hand-authored, spreadsheet-sourced, or sprite-derived tabular grid) in either of two forms and produces the single shared Pixel Grid JSON contract consumed by every Fabrication/Mosaic component below.",
+          "implementation_note": "Revised per Gate 6 contract clarification: Rows is now a generic (Colour or Text) tree accepting EITHER (a) a DataTree where each branch {y} holds multiple Colour/hex items (one per cell), OR (b) a flat list with one comma-separated hex string per row (e.g. \"#FF0000, #00FF00, #0000FF\"). Added Pitch/Thickness inputs (informational metadata only). Output schema changed from {rows,cols,cells} to {bounds,pitch,thickness,palette,indices} — palette is deduplicated in first-seen order, indices reference it, -1 marks a void/transparent cell.",
+          "inputs": [
+            { "name": "Rows", "nickname": "RV", "type": "generic (colour or text)", "access": "tree" },
+            { "name": "Pitch", "nickname": "P", "type": "double", "access": "item", "default": 2.0 },
+            { "name": "Thickness", "nickname": "TH", "type": "double", "access": "item", "default": 1.0 }
+          ],
+          "outputs": [
+            { "name": "Pixel Grid JSON", "nickname": "PGJ", "type": "string", "access": "item", "note": "{bounds:{rows,cols}, pitch, thickness, palette:[hex,...], indices:[[idx,...],...]}" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04. Fabrication",
+      "type": "component",
+      "components": [
+        {
+          "class_name": "VoxelMeshShellComponent",
+          "file_name": "VoxelMeshShell.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": null,
+          "name": "Voxel Mesh Shell",
+          "nickname": "VOX",
+          "workflow": "Game badge set -> voxel plaque batch",
+          "inputs": [
+            { "name": "Pixel Grid JSON", "nickname": "PGJ", "type": "string", "access": "item" },
+            { "name": "Voxel Size", "nickname": "VS", "type": "double", "access": "item", "default": 2.0 },
+            { "name": "Extrusion Height", "nickname": "EH", "type": "double", "access": "tree", "optional": true }
+          ],
+          "outputs": [
+            { "name": "Voxel Mesh", "nickname": "VM", "type": "mesh", "access": "tree" }
+          ]
+        },
+        {
+          "class_name": "MultiMaterialInterlockComponent",
+          "file_name": "MultiMaterialInterlock.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": null,
+          "name": "Multi-Material Interlock",
+          "nickname": "INTER",
+          "workflow": "Palette quantization sweep across a sprite tree",
+          "inputs": [
+            { "name": "Voxel Mesh", "nickname": "VM", "type": "mesh", "access": "tree" },
+            { "name": "Filament Match JSON", "nickname": "FMJ", "type": "string", "access": "tree" }
+          ],
+          "outputs": [
+            { "name": "Interlock Mesh", "nickname": "IM", "type": "mesh", "access": "tree" }
+          ]
+        },
+        {
+          "class_name": "LaserStandoffStackComponent",
+          "file_name": "LaserStandoffStack.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": "GetGame",
+          "endpoint_note": "Consumes GetGame's ImageBoxArt-derived aspect ratio as an optional input; also usable with a manually supplied aspect ratio, no API call required.",
+          "name": "Laser Standoff Stack",
+          "nickname": "STACK",
+          "workflow": "Box-art-scaled laser standoff stack",
+          "inputs": [
+            { "name": "Aspect Ratio", "nickname": "AR", "type": "double", "access": "item", "default": 1.0 },
+            { "name": "Stack Count", "nickname": "SC", "type": "int", "access": "item", "default": 4 },
+            { "name": "Panel Thickness", "nickname": "PT", "type": "double", "access": "item", "default": 3.0 }
+          ],
+          "outputs": [
+            { "name": "Standoff Geometry", "nickname": "SG", "type": "brep", "access": "list" }
+          ]
+        },
+        {
+          "class_name": "AchievementAttributeBridgeComponent",
+          "file_name": "AchievementAttributeBridge.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": null,
+          "name": "Achievement Attribute Bridge",
+          "nickname": "BRIDGE",
+          "workflow": "Game badge set -> voxel plaque batch",
+          "aec_feature": "BIM Data Bridge",
+          "note": "Selected at Gate 3. Writes each achievement's Title, Points, Description, and BadgeName into the matching Voxel Mesh's Rhino UserDictionary (item→item merge by tree branch) so a fabricated plaque batch stays self-documenting — which mesh is which achievement — after it leaves the GH tree structure. Pure local data merge, no additional HTTP calls.",
+          "inputs": [
+            { "name": "Voxel Mesh", "nickname": "VM", "type": "mesh", "access": "tree" },
+            { "name": "Achievement JSON", "nickname": "AJ", "type": "string", "access": "tree" }
+          ],
+          "outputs": [
+            { "name": "Tagged Mesh", "nickname": "TM", "type": "mesh", "access": "tree" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05. Mosaic",
+      "type": "component",
+      "components": [
+        {
+          "class_name": "LegoStudPlateComponent",
+          "file_name": "LegoStudPlate.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": null,
+          "name": "Lego Stud Plate",
+          "nickname": "LEGO",
+          "workflow": "Tabular pixel grid -> mosaic/voxel geometry (cross-platform benchmark)",
+          "inputs": [
+            { "name": "Pixel Grid JSON", "nickname": "PGJ", "type": "string", "access": "item" },
+            { "name": "Stud Size", "nickname": "SS", "type": "double", "access": "item", "default": 8.0 }
+          ],
+          "outputs": [
+            { "name": "Stud Plate Mesh", "nickname": "SPM", "type": "mesh", "access": "tree" }
+          ]
+        },
+        {
+          "class_name": "PerlerBeadGridComponent",
+          "file_name": "PerlerBeadGrid.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": null,
+          "name": "Perler Bead Grid",
+          "nickname": "PERLER",
+          "workflow": "Tabular pixel grid -> mosaic/voxel geometry (cross-platform benchmark)",
+          "inputs": [
+            { "name": "Pixel Grid JSON", "nickname": "PGJ", "type": "string", "access": "item" },
+            { "name": "Bead Size", "nickname": "BS", "type": "double", "access": "item", "default": 5.0 }
+          ],
+          "outputs": [
+            { "name": "Bead Grid Mesh", "nickname": "BGM", "type": "mesh", "access": "tree" }
+          ]
+        },
+        {
+          "class_name": "LEDMatrixMapperComponent",
+          "file_name": "LEDMatrixMapper.cs",
+          "type": "component",
+          "role": "unit",
+          "endpoint_id": null,
+          "name": "LED Matrix Mapper",
+          "nickname": "LED",
+          "workflow": "Tabular pixel grid -> mosaic/voxel geometry (cross-platform benchmark)",
+          "inputs": [
+            { "name": "Pixel Grid JSON", "nickname": "PGJ", "type": "string", "access": "item" },
+            { "name": "LED Pitch", "nickname": "LP", "type": "double", "access": "item", "default": 10.0 }
+          ],
+          "outputs": [
+            { "name": "LED Address JSON", "nickname": "LAJ", "type": "string", "access": "tree" },
+            { "name": "LED Position", "nickname": "LPOS", "type": "point", "access": "tree" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06. Presets",
+      "type": "preset",
+      "components": [
+        {
+          "class_name": "RAConsolePresetComponent",
+          "file_name": "RAConsolePreset.cs",
+          "type": "preset",
+          "role": "preset",
+          "endpoint_id": "GetConsoleIDs",
+          "name": "RA Console",
+          "nickname": "CONSOLE",
+          "note": "Doubles as the connectivity/key-check step (merged from the former standalone Auth component per Gate 2): calling GetConsoleIDs with the supplied Token both validates the API key and populates the console value list. Status output surfaces auth failure directly on this component instead of a separate one.",
+          "inputs": [
+            { "name": "Token", "nickname": "T", "type": "string", "access": "item", "default": "" }
+          ],
+          "outputs": [
+            { "name": "Status", "nickname": "S", "type": "string", "access": "item" },
+            { "name": "Response", "nickname": "R", "type": "string", "access": "item" },
+            { "name": "Console ID", "nickname": "CID", "type": "int", "access": "list" },
+            { "name": "Console Name", "nickname": "CN", "type": "string", "access": "list" }
+          ],
+          "implementation_note": "Phase 9: outputs corrected from a single item Console ID to list access for Console ID + Console Name (GetConsoleIDs returns an array of consoles) — a single-item output couldn't have served as a real value-list populator as the Gate 3 merge intended. Status/Response moved to outputs 0/1 per ButtonComponent's fixed-index convention (pr-button)."
+        }
+      ]
+    },
+    {
+      "name": "07. Utilities",
+      "type": "util",
+      "components": [
+        { "class_name": "RetroVoxelClient", "file_name": "RetroVoxelClient.cs", "type": "infrastructure" },
+        { "class_name": "PluginUtilities", "file_name": "PluginUtilities.cs", "type": "infrastructure" },
+        { "class_name": "ButtonComponent", "file_name": "ButtonComponent.cs", "type": "infrastructure" }
+      ]
+    }
+  ],
+
+  "builders": [
+    {
+      "file_name": "PixelGridBuilders.cs",
+      "covers": ["Pixel Grid"],
+      "used_by": ["PixelGridBuilderComponent"]
+    },
+    {
+      "file_name": "FilamentBuilders.cs",
+      "covers": ["Filament Match"],
+      "used_by": ["DeltaEFilamentMatcherComponent"]
+    }
+  ],
+
+  "relations": [
+    { "from": "SpriteSheetSplitterComponent.Pixel Colors", "to": "PaletteQuantizerComponent.Pixel Colors", "nickname": "PC", "access": "tree→tree" },
+    { "from": "RAGameInfoComponent.Achievement JSON", "to": "RABadgesComponent.Achievement JSON", "nickname": "AJ", "access": "tree→tree" },
+    { "from": "PaletteQuantizerComponent.Palette", "to": "DeltaEFilamentMatcherComponent.Palette", "nickname": "PAL", "access": "list→list" },
+    { "from": "FilamentLibraryLoaderComponent.Filament Library JSON", "to": "DeltaEFilamentMatcherComponent.Filament Library JSON", "nickname": "FLJ", "access": "item→item" },
+    { "from": "DeltaEFilamentMatcherComponent.Filament Match JSON", "to": "MultiMaterialInterlockComponent.Filament Match JSON", "nickname": "FMJ", "access": "list→item" },
+    { "from": "VoxelMeshShellComponent.Voxel Mesh", "to": "MultiMaterialInterlockComponent.Voxel Mesh", "nickname": "VM", "access": "tree→tree" },
+    { "from": "PixelGridBuilderComponent.Pixel Grid JSON", "to": "VoxelMeshShellComponent.Pixel Grid JSON", "nickname": "PGJ", "access": "item→item" },
+    { "from": "PixelGridBuilderComponent.Pixel Grid JSON", "to": "LegoStudPlateComponent.Pixel Grid JSON", "nickname": "PGJ", "access": "item→item" },
+    { "from": "PixelGridBuilderComponent.Pixel Grid JSON", "to": "PerlerBeadGridComponent.Pixel Grid JSON", "nickname": "PGJ", "access": "item→item" },
+    { "from": "PixelGridBuilderComponent.Pixel Grid JSON", "to": "LEDMatrixMapperComponent.Pixel Grid JSON", "nickname": "PGJ", "access": "item→item" },
+    { "from": "VoxelMeshShellComponent.Voxel Mesh", "to": "AchievementAttributeBridgeComponent.Voxel Mesh", "nickname": "VM", "access": "tree→tree" },
+    { "from": "RAGameInfoComponent.Achievement JSON", "to": "AchievementAttributeBridgeComponent.Achievement JSON", "nickname": "AJ", "access": "tree→tree" }
+  ],
+
+  "payload_contracts": [
+    {
+      "resource": "Pixel Grid",
+      "contract": { "name": "Pixel Grid JSON", "nickname": "PGJ", "access": "item" },
+      "produced_by": "PixelGridBuilderComponent",
+      "consumed_by": ["VoxelMeshShellComponent", "LegoStudPlateComponent", "PerlerBeadGridComponent", "LEDMatrixMapperComponent"],
+      "note": "Not a REST write contract (RA API is read-only) — this is the shared local-geometry payload interchangeable across every fabrication/mosaic output, satisfying the same modularity goal: one producer, many interchangeable consumers."
+    }
+  ],
+
+  "proposed_to_skip_for_v1": [
+    { "item": "RA write endpoints (set requests, comments, awards writes)", "reason": "Not used by any stated workflow — RetroVoxel is a read + local-fabrication tool, not an RA account manager." },
+    { "item": "GetUserProgress / GetUserProfile / Leaderboards / Tickets / Feed endpoints", "reason": "Not used by any stated workflow; RetroVoxel's Ingest scope is Game + Achievement + Console catalog data only, per the user's stated subcategories." },
+    { "item": "GetGameList", "reason": "No longer skipped — added post-ship as Find Game's endpoint (name -> Game ID lookup), per user request." }
+  ],
+
+  "aec_features": [
+    {
+      "feature": "BIM Data Bridge",
+      "component": "AchievementAttributeBridgeComponent",
+      "selected_at": "Gate 3",
+      "rationale": "Attaches achievement metadata (Title, Points, Description, BadgeName) directly to mesh UserDictionaries so fabricated parts stay self-documenting, with no added HTTP overhead."
+    }
+  ],
+  "aec_features_declined": [
+    { "feature": "Batch Processor", "reason": "Grasshopper already manages multi-game batching natively through input lists and data trees." },
+    { "feature": "Auth Manager", "reason": "Already merged into RA Console (06. Presets) at Gate 2." },
+    { "feature": "Error Reporter", "reason": "Already covered by existing Status/Response outputs on RA Game Info / RA Console." },
+    { "feature": "Version Watcher", "reason": "No timestamp field exists on any RA resource this plugin touches." },
+    { "feature": "Geometry Serializer", "reason": "All geometry is produced locally from Pixel Grid JSON; nothing round-trips geometry through the API." },
+    { "feature": "In-GH Documentation Writer", "reason": "No rich-text/document field exists on any RA resource to write into." }
+  ]
+}

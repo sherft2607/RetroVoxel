@@ -1,0 +1,45 @@
+{
+  "workflows": [
+    {
+      "name": "Game badge set -> voxel plaque batch",
+      "user_goal": "Pull every achievement badge for a game and turn the whole set into individually-sized voxel plaques in one operation",
+      "data_shape": "tree of achievement records (GetGameExtended.Achievements) -> parallel tree of badge images -> tree of voxel meshes",
+      "varies_per_item": true,
+      "uses_fields": ["API_GetGameExtended.php Achievements[].BadgeName", "i.retroachievements.org/Badge/{BadgeName}.png"],
+      "why_grasshopper": "RA's own site shows badges one achievement at a time; GH processes the whole achievement tree as one parametric batch (quantize + voxelize every badge in the set at once, vary voxel height by e.g. Points or rarity per branch) instead of downloading and converting each badge by hand."
+    },
+    {
+      "name": "Local sprite sheet -> per-frame voxel extrusion",
+      "user_goal": "Split a sprite sheet into a tree of frames and vary voxel extrusion height per frame based on a computed value (e.g. animation index)",
+      "data_shape": "tree of sprite frames -> parallel tree of extrusion heights -> tree of voxel meshes",
+      "varies_per_item": true,
+      "uses_fields": ["local sprite sheet image", "grid cell size"],
+      "why_grasshopper": "Frame-by-frame extrusion tuning in an image editor is manual per-frame work; in GH it's one tree operation with a Graph Mapper or Remap Numbers driving height per frame."
+    },
+    {
+      "name": "Palette quantization sweep across a sprite tree",
+      "user_goal": "Quantize a tree of sprites/badges down to a target filament color count and preview Delta-E match before committing to fabrication",
+      "data_shape": "tree of source images -> parallel tree of quantized palettes -> tree of matched filament names",
+      "varies_per_item": true,
+      "uses_fields": ["source pixel colors", "filament color library"],
+      "why_grasshopper": "Swapping palette size or filament library across dozens of sprites at once is a single parametric sweep in GH; doing it per-image in a photo editor doesn't scale."
+    },
+    {
+      "name": "Tabular pixel grid -> mosaic/voxel geometry (cross-platform benchmark)",
+      "user_goal": "Take a simple tree/list of tabular data (rows x columns of RGB or palette-index values, as if from a CSV or spreadsheet) and turn it directly into mosaic or voxel geometry",
+      "data_shape": "tree of rows, each a list of per-cell color/index values -> tree of placed studs/beads/LEDs/voxels",
+      "varies_per_item": true,
+      "benchmark": "tabular-to-platform",
+      "uses_fields": ["pixel art IS inherently a tabular RGB grid — this benchmark maps directly onto the plugin's own sprite data model"],
+      "why_grasshopper": "Pixel art is already a row/column grid of color values, so the standard tabular-to-platform benchmark is a first-class use case here, not a stretch: any tabular color grid (hand-authored, from a spreadsheet, or from a sprite) becomes stud/bead/LED/voxel placement with one aggregator chain."
+    },
+    {
+      "name": "Box-art-scaled laser standoff stack",
+      "user_goal": "Fetch a game's box art dimensions/aspect ratio from RA and size a laser-cut standoff stack to match without manual measuring",
+      "data_shape": "single game record (GetGame.ImageBoxArt) -> aspect ratio value -> parametric standoff stack geometry",
+      "varies_per_item": false,
+      "uses_fields": ["API_GetGame.php ImageBoxArt", "i.retroachievements.org/Images/{id}.png"],
+      "why_grasshopper": "Ties real fetched artwork proportions directly into parametric fabrication geometry instead of eyeballing dimensions from a downloaded image."
+    }
+  ]
+}

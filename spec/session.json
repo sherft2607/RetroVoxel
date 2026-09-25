@@ -1,0 +1,32 @@
+{
+  "plugin_name": "RetroVoxel",
+  "plugin_prefix": "RVX",
+  "author": { "name": "Shandon Herft", "contact": "shandonherft@gmail.com" },
+  "github_org": "shandonherft",
+  "findings_path": "dogfood/RetroVoxel-run-01.md",
+  "current_phase": 14,
+  "phases_completed": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+  "phase_9_files_written": ["Utilities/RetroVoxelClient.cs", "Utilities/PluginUtilities.cs", "Utilities/ButtonComponent.cs", "Components/Presets/RAConsolePreset.cs"],
+  "phase_7_blocked": null,
+  "gates_passed": ["1", "2", "3", "4", "5", "6"],
+  "gates_pending": [],
+  "gate_feedback": {},
+  "awaiting_fix": false,
+  "preflight": {
+    "please_rest_loaded": "ok",
+    "mcp_python_deps": "ok",
+    "dotnet_sdk": "ok - 8.0.425",
+    "yak": "ok - found for Rhino 7 and Rhino 8",
+    "token": "ok - validated at Phase 7 against live RA API (Console ID 7 / Game ID 1446)",
+    "rhino_bridge": "unknown - not checked, only affects Phase 12 Step B"
+  },
+  "degraded": { "12": "no Grasshopper MCP bridge configured — demos/README.md written for manual build; Gate 6 will be fully manual" },
+  "decisions": {
+    "seed_ids": { "console_id": 7, "game_id": 1446 },
+    "token_ready": false,
+    "build_approved": true,
+    "aec_features_selected": ["BIM Data Bridge (AchievementAttributeBridgeComponent)"]
+  },
+  "phase_progress": {},
+  "published": {}
+}

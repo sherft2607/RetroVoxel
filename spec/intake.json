@@ -1,0 +1,18 @@
+{
+  "plugin_name": "RetroVoxel",
+  "plugin_prefix": "RVX",
+  "description": "Computational design and physical fabrication toolkit for retro gaming pixel art, sprite sheets, and mosaic geometry.",
+  "primary_target": "Rhino 8 Windows (.NET 7)",
+  "multi_targets": ["Rhino 8 Mac (.NET 7)", "Rhino 7 (.NET 4.8)"],
+  "docs_url": "https://retroachievements.org/API/",
+  "author": { "name": "Shandon Herft", "contact": "shandonherft@gmail.com" },
+  "github_org": "shandonherft",
+  "token_ready": false,
+  "seed_ids": { "console_id": 7, "game_id": 1446 },
+  "primary_subcategories": [
+    { "name": "01. Ingest", "components": ["Local Sprite Loader", "Sprite Sheet Splitter", "RA Game Info", "RA Badges"] },
+    { "name": "02. Color", "components": ["Palette Quantizer", "Delta-E Filament Matcher"] },
+    { "name": "03. Fabrication", "components": ["Voxel Mesh Shell", "Multi-Material Interlock", "Laser Standoff Stack"] },
+    { "name": "04. Mosaic", "components": ["Lego Stud Plate", "Perler Bead Grid", "LED Matrix Mapper"] }
+  ]
+}
